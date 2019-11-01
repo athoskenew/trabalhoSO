@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "pilha.c"
-
+//Aqui é um exemplo de código com pilha 
+//Vamos precisar inserir e remover da pilha os processos
+//
 void main () {
 
 	int opcao, capa;
