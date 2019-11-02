@@ -1,132 +1,62 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <pthread.h>
-#include <locale.h>
-#include <string.h>
+#include <stdlib.h>
 #include "fila.c"
-#include <unistd.h>
-#include <dos.h>
-#include <time.h>
-/*Implementação do SO  Básico (Primitivo), em relação as operações básicas do gerenciamento de processos*/
-/*Agendamento de Processos
+#define QUANTUM 2
+// assinaturas das funções
+void gerar_processos(Fila* f,int quantidade);
+void executar_processos(Fila*f);
 
-/*Vale 10% da nota da 2ª Av*/
-//	
-//int processo(pilha m){
-//
-//}
-//
+int main (void){
+	
+	Fila* f = fila_cria(); //cria a fila de processos vazia
+	Fila* finalizados = fila_cria(); //fila onde processo finalizados ficarão
+	srand(time(NULL)); //alimentando rand()
+	gerar_processos(f,20); //gerando 20 processos
+	
+	
+	
+	
+	fila_imprime_processos(f); //imprimindo os processos da fila
+	executar_processos(f);
+	return 0;
+}
 
-void main() {
-	/*Implementar Pilhas que são criadas por threads*/
-	setlocale(LC_ALL,"Portuguese");
-	struct Fila E,B,P,aux;
-//	//int bloqueado;
-//	//int pronto;
-//	//int executando;
-	int verificador;
-	//char Sim = 's';
-	//printf("%c",Sim);
-	//char verificadorString[4] = ' ';
-	criarFila(&E,100);
-	criarFila(&B,100);
-	criarFila(&P,100);
-	int id=0, tipo;
-	printf("Olá sou o Gerenciador do SO!\n");
-	
-	while(1){
-		
-		printf("\t1 p/ add Processo em Pronto? s = 1/n = 2\n");
-		scanf("%d",&verificador);
-		
-		if(verificador==2){
-			verificador = 0;
-			printf("\t1 p/ ver a lista de Processos\n");
-			scanf("%d",&verificador);
-		
-			switch(verificador){
-				case 1:
-					verificador = 0;
-					printf("Lista de processos apos a criacao de um processo\n\n");
-					if(estaVazia(&E)){
-						printf("\nFila vazia!!\n\n");
-					}
-					else{
-						printf("\nProcesso em Execução => ");
-						mostrarFila(&E);
-						}
-					if(estaVazia(&P)){
-						printf("\nFila vazia!!\n\n");
-					}
-					else{
-						printf("\nProcessos em Pronto => ");
-						mostrarFila(&P);
-						}
-					if(estaVazia(&B)){
-						printf("\nFila vazia!!\n\n");
-					}
-					else{
-						printf("\nProcessos em Bloqueado => ");
-						mostrarFila(&B);
-						}
-					break;			
-		}
-		}
-		if(verificador==1){
-			do{
-				printf("Digite o tipo do processo\n1 - CPU-Bound\n2 - I/O-Bound");//definicao do tipo do processo
-				scanf("%d",&tipo);
-				switch(tipo){
-					case 1://caso o processo seja do tipo CPU-Bound
-						id++;
-						inserir(&P, id);
-						printf("O processo %d foi inserido em pronto\n",id);//todo processo criado ira para a fila de pronto
-						sleep(1);//aguarda 1s
-						remover(&P);//sai da fila de pronto
-						printf("O processo %d ficou 1s em pronto\n",id);
-						if(!estaVazia(&E)){
-							remover(&E);
-							printf("Processo %d retirado\n",id-1);//casa haja 1 processo na fila de execucao esse processo eh retirado para a entrada do proximo
-							inserir(&E, id);//o processo eh inserido na fila de execucao
-							printf("O processo %d foi inserido em execucao\n",id);
-						}
-						else{
-							inserir(&E,id);
-							printf("O processo %d foi inserido em execucao\n",id);//o processo eh inserido na fila de execucao
-						}
-					break;
-					case 2://caso o processo seja do tipo I/O-Bound
-						id++;
-						inserir(&P, id);
-						printf("O processo %d foi inserido em pronto\n",id);//todo processo criado ira para a fila de pronto
-						sleep(1);//aguarda 1s
-						remover(&P);//sai da fila de pronto
-						printf("O processo %d ficou 1s em pronto\n",id);
-						inserir(&B, id);
-						printf("O processo %d foi inserido em bloqueado\n",id);
-						sleep(5);//o processo eh inserido na fila de bloqueado
-						printf("O processo %d ficou 5s em bloqueado\n",id);
-					break;
-					default:
-						printf("Tipo invalido!");
-					break;
-				}
-			}while(tipo!=1 && tipo!=2);
-				//for(i=0;i<P.nItens-2;i++){
-			//		inserir(&aux, remover(&P));
-			//	}
-			
-		}
-	
-		//if(){
-			
-	//	}
-		
-		
-		
-		//printf("/t2 p/ ver as lista de SO em pronto/n");
-		//printf("/t3 p/ ver as lista de SO em bloqueado/n");
+
+/* essa função irá gerar processos aleatórios
+// de acordo com a quantidade solicitada
+// e adicionará cada processo na fila f inserida
+id = procedural
+tipo = aleatório entre 1 e 2
+tempo de execução = aleatório entre 1 e 10
+estado = 2 (pronto)
+*/
+
+void gerar_processos(Fila* f,int quantidade){
+	srand(time(NULL)); //alimenta o rand - verificar se precisa estar aq
+	int i;
+	//roda a quantidade recebida de vezes
+	for (i=1;i<quantidade+1;i++){
+		int tipo_processo = (rand()%2)+1;
+		int tempo_execucao = (rand()%10)+1;
+		fila_insere_processo(f,i,tipo_processo,tempo_execucao); //criando processos com id = i e tipo = rand e te = rand
 	}
-	//return 0;
+}
+
+void executar_processos(Fila*f){
+	Lista* aux;
+	aux = f->ini;
+	while(!fila_vazia(f)){
+		Lista* prox = aux->prox;
+		printf("Executando processo: %d | TE T = %d\n", aux->id, aux->te);
+		//retira 2 do tempo execução do processo atual
+		aux->te = (aux->te-QUANTUM);
+		printf("Retirado %d do processo %d | TE T = %d\n", QUANTUM, aux->id, aux->te);
+		//passa para o próximo processo
+		if(aux->te<=0){
+			printf("Processo %d com te = %d", aux->id, aux->te);
+			break;
+		}
+		aux = prox;
+	}
 }
 
