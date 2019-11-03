@@ -4,20 +4,24 @@
 #define QUANTUM 2
 // assinaturas das funções
 void gerar_processos(Fila* f,int quantidade);
-void executar_processos(Fila*f);
+void retira_finalizado(Fila* f, Fila* p);
+void executar_processos(Fila* f, Fila* p);
 
 int main (void){
-	
+	Fila* p = fila_cria();
 	Fila* f = fila_cria(); //cria a fila de processos vazia
 	Fila* finalizados = fila_cria(); //fila onde processo finalizados ficarão
 	srand(time(NULL)); //alimentando rand()
 	gerar_processos(f,20); //gerando 20 processos
-	
-	
-	
-	
+	fila_insere_processo(f,25,2,0); //processo criado para testar função
 	fila_imprime_processos(f); //imprimindo os processos da fila
-	executar_processos(f);
+	retira_finalizado(f,p);
+	printf("");
+	printf("######################################\n");
+	fila_imprime_processos(p); //imprimindo os processos atualizados
+	printf("");
+	printf("######################################\n");
+	executar_processos(f,p);
 	return 0;
 }
 
@@ -42,20 +46,49 @@ void gerar_processos(Fila* f,int quantidade){
 	}
 }
 
-void executar_processos(Fila*f){
+
+void retira_finalizado(Fila* f, Fila* p){
+	Lista* aux = f->ini;
+	Lista* dois = f->ini;
+	Fila* k = p;
+	//se o te for 0 então retira e retorna a lista
+	for(aux;aux!=NULL;aux=aux->prox){	
+		//ve se o te é 0
+		if(aux->te==0){
+			if(aux->prox==NULL){ //se encontrar no ultimo laço, apenas para o loop
+				break;
+			}
+			printf("Achou - id: %d \n",aux->id);
+			aux = aux->prox;
+		}
+		//se não for passa o processo pra fila k
+		fila_insere_processo(k,aux->id,aux->tipo,aux->te); 
+	}
+	
+	//return k; //se não, retorna a fila anterior
+}
+
+void executar_processos(Fila* f, Fila* p){
 	Lista* aux;
 	aux = f->ini;
-	while(!fila_vazia(f)){
+	Fila* k = p;
+	Fila* m = f;
+	while(!fila_vazia(m)){
 		Lista* prox = aux->prox;
 		printf("Executando processo: %d | TE T = %d\n", aux->id, aux->te);
+		
 		//retira 2 do tempo execução do processo atual
-		aux->te = (aux->te-QUANTUM);
-		printf("Retirado %d do processo %d | TE T = %d\n", QUANTUM, aux->id, aux->te);
-		//passa para o próximo processo
-		if(aux->te<=0){
-			printf("Processo %d com te = %d", aux->id, aux->te);
-			break;
+		if(aux->te<QUANTUM){
+			printf("Retirado %d do processo %d | TE T = %d\n", aux->te, aux->id,0);
+			aux->te = 0; //retira tudo pq é menor que o quantum
 		}
+		else{
+			aux->te = (aux->te-QUANTUM);
+			printf("Retirado %d do processo %d | TE T = %d\n", QUANTUM, aux->id, aux->te);	
+		}
+		
+		//passa para o próximo processo
+		retira_finalizado(m,k);
 		aux = prox;
 	}
 }

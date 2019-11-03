@@ -93,3 +93,40 @@ void fila_libera(Fila* f) {		// libera a memória alocada para a fila
 	}
 	free(f);					// libera, por fim, o ponteiro da fila inteira
 }
+
+//vai buscar um id na fila
+
+void realocar(Fila* ant, Lista* atual){
+	//essa função tem que fazer, propositalmente
+	//a fila perder a referencia do processo
+	
+}
+
+Lista* lst_retira(Lista* l, int id) {
+	Lista* ant = NULL;								// ponteiro auxiliar para guardar a referência do nó anterior
+	Lista* p = l;									// ponteiro auxiliar para percorrer a lista
+	
+	while(p != NULL && p->id != id) {			// o laço executa até atingir o fim da lista ou até o valor ter sido encontrado
+		ant = p;									// atualiza o valor do ponteiro anterior para o nó atual
+		p = p->prox;								// atualiza o valor do ponteiro atual para o próximo
+	}
+	
+	if( p == NULL )									// se tiver atingido o fim da lista significa que o valor não foi encontrado
+		return l;										// então retorne a lista original, sem mudanças
+		
+	if( ant == NULL )								// se o valor inicial de 'ant' (NULL) não tiver sido alterado, significa que o nó removido foi o primeiro
+		l = p->prox;									// então basta apontar o ponteiro original da lista para o segundo nó
+	else											// caso contrário (o elemento a ser retirado NÃO é o primeiro, ou seja, está no meio ou fim da lista)
+		ant->prox = p->prox;							// então basta conectar o nó anterior com o próximo do nó que foi removido
+		
+	free(p);										// libere o espaço de memória apenas do nó que foi removido
+	return l;										// retorne o ponteiro original da lista para atualizá-la
+}
+
+void lst_imprime(Lista* l) {
+	Lista* aux;										// ponteiro de lista auxiliar para percorrê-la
+	for(aux = l; aux != NULL; aux = aux->prox) {	// laço para percorrer cada Nó
+		printf("%d ", aux->id);	// e imprimir o seu conteúdo
+	}
+	printf("\n");
+}

@@ -32,3 +32,7 @@ int fila_vazia(Fila* f);
 void fila_libera(Fila* f);
 
 
+//realoca a fila, perdendo referencia do atual
+void realocar(Fila* ant, Lista* atual);
+
+
