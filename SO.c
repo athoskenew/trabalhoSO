@@ -4,35 +4,39 @@
 #define QUANTUM 2
 // assinaturas das funções
 void gerar_processos(Fila* f,int quantidade);
-void retira_finalizado(Fila* f, Fila* p);
+Fila* retira_finalizado(Fila* f);
 void executar_processos(Fila* f, Fila* p);
+Fila* remanejar(Fila* f);
 
 int main (void){
-	Fila* p = fila_cria();
+	Fila* p; //= fila_cria();
 	Fila* f = fila_cria(); //cria a fila de processos vazia
 	Fila* finalizados = fila_cria(); //fila onde processo finalizados ficarão
 	srand(time(NULL)); //alimentando rand()
+	fila_insere_processo(f,50,2,0); //processo criado para testar função
 	gerar_processos(f,20); //gerando 20 processos
 	fila_insere_processo(f,25,2,0); //processo criado para testar função
 	fila_imprime_processos(f); //imprimindo os processos da fila
-	retira_finalizado(f,p);
+	//f = retira_finalizado(f);
+	p = remanejar(f);
+	f = retira_finalizado(f);
 	printf("");
 	printf("######################################\n");
 	fila_imprime_processos(p); //imprimindo os processos atualizados
 	printf("");
 	printf("######################################\n");
-	executar_processos(f,p);
+	//executar_processos(f,p);
 	return 0;
 }
 
 
-/* essa função irá gerar processos aleatórios
-// de acordo com a quantidade solicitada
-// e adicionará cada processo na fila f inserida
-id = procedural
-tipo = aleatório entre 1 e 2
-tempo de execução = aleatório entre 1 e 10
-estado = 2 (pronto)
+/* Essa função irá gerar processos aleatórios
+** De acordo com a quantidade solicitada
+** E adicionará cada processo na fila f inserida
+** id = procedural
+** tipo = aleatório entre 1 e 2
+** tempo de execução = aleatório entre 1 e 10
+** estado = 2 (pronto)
 */
 
 void gerar_processos(Fila* f,int quantidade){
@@ -46,11 +50,16 @@ void gerar_processos(Fila* f,int quantidade){
 	}
 }
 
+/* Retira da fila os processos que
+** Já foram finalizados
+** E retorna uma lista sem eles
+** Facilitando a manipulação da lista
+*/
 
-void retira_finalizado(Fila* f, Fila* p){
+Fila* retira_finalizado(Fila* f){
 	Lista* aux = f->ini;
 	Lista* dois = f->ini;
-	Fila* k = p;
+	Fila* k = fila_cria();
 	//se o te for 0 então retira e retorna a lista
 	for(aux;aux!=NULL;aux=aux->prox){	
 		//ve se o te é 0
@@ -64,8 +73,38 @@ void retira_finalizado(Fila* f, Fila* p){
 		//se não for passa o processo pra fila k
 		fila_insere_processo(k,aux->id,aux->tipo,aux->te); 
 	}
-	
+	return k;
 	//return k; //se não, retorna a fila anterior
+}
+
+/* Essa função irá passar todos os processos
+** Que já foram finalizados de uma fila f para
+** Uma outra fila p, e liberará toda
+** a fila antiga f, perdendo sua referência
+*/
+
+Fila* remanejar(Fila* f){
+	Fila* tst = f;
+	Lista* aux = f->ini;
+	Fila* k = fila_cria();
+	//se o te for 0 então retira e retorna a lista com te 0
+	for(aux;aux!=NULL;aux=aux->prox){	
+		//ve se o te é 0
+		if(aux->te==0){
+			if(aux->prox==NULL){ //se encontrar no ultimo laço, apenas para o loop
+				fila_insere_processo(k,aux->id,aux->tipo,aux->te);
+				break;
+			}
+			printf("Achou - id: %d \n",aux->id);
+			fila_insere_processo(k,aux->id,aux->tipo,aux->te);
+		}
+		//se não for passa o processo pra fila k
+		else{
+			aux = aux->prox; //caso não seja 0, passa para proximo nó
+		} 
+	}
+	//fila_libera(tst); //libera a fila f passada como argumento, tomar cuidado com isso
+	return k; //retorna a fila com processos zerados
 }
 
 void executar_processos(Fila* f, Fila* p){
@@ -75,6 +114,7 @@ void executar_processos(Fila* f, Fila* p){
 	Fila* m = f;
 	while(!fila_vazia(m)){
 		Lista* prox = aux->prox;
+		Lista* atualizada = p->ini;
 		printf("Executando processo: %d | TE T = %d\n", aux->id, aux->te);
 		
 		//retira 2 do tempo execução do processo atual
@@ -88,8 +128,9 @@ void executar_processos(Fila* f, Fila* p){
 		}
 		
 		//passa para o próximo processo
-		retira_finalizado(m,k);
-		aux = prox;
+		retira_finalizado(m); //a que fica sem os processos é a k
+		aux = atualizada;
+		sleep(3);
 	}
 }
 
