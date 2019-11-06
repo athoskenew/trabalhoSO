@@ -5,27 +5,28 @@
 // assinaturas das funções
 void gerar_processos(Fila* f,int quantidade);
 Fila* retira_finalizado(Fila* f);
-void executar_processos(Fila* f, Fila* p);
+void executar_processos(Fila* f);
 Fila* remanejar(Fila* f);
 
 int main (void){
-	Fila* p; //= fila_cria();
+	Fila* p;
 	Fila* f = fila_cria(); //cria a fila de processos vazia
-	Fila* finalizados = fila_cria(); //fila onde processo finalizados ficarão
+	
 	srand(time(NULL)); //alimentando rand()
 	fila_insere_processo(f,50,2,0); //processo criado para testar função
-	gerar_processos(f,20); //gerando 20 processos
+	gerar_processos(f,10); //gerando 20 processos
 	fila_insere_processo(f,25,2,0); //processo criado para testar função
 	fila_imprime_processos(f); //imprimindo os processos da fila
-	//f = retira_finalizado(f);
-	p = remanejar(f);
-	f = retira_finalizado(f);
-	printf("");
+
+//	p = remanejar(f); //não usaremos remanejar por enquanto
+//	f = retira_finalizado(f);
+	
 	printf("######################################\n");
-	fila_imprime_processos(p); //imprimindo os processos atualizados
-	printf("");
+	
+//	fila_imprime_processos(p); //imprimindo os processos atualizados
+	
 	printf("######################################\n");
-	//executar_processos(f,p);
+	executar_processos(f);
 	return 0;
 }
 
@@ -107,30 +108,31 @@ Fila* remanejar(Fila* f){
 	return k; //retorna a fila com processos zerados
 }
 
-void executar_processos(Fila* f, Fila* p){
+void executar_processos(Fila* f){
 	Lista* aux;
-	aux = f->ini;
-	Fila* k = p;
 	Fila* m = f;
+	aux = m->ini;
 	while(!fila_vazia(m)){
-		Lista* prox = aux->prox;
-		Lista* atualizada = p->ini;
-		printf("Executando processo: %d | TE T = %d\n", aux->id, aux->te);
+		for(aux;aux!=NULL;aux=aux->prox){
+			//Lista* prox = aux->prox;
+
+			printf("Executando processo: %d | TE T = %d\n", aux->id, aux->te);
 		
-		//retira 2 do tempo execução do processo atual
-		if(aux->te<QUANTUM){
-			printf("Retirado %d do processo %d | TE T = %d\n", aux->te, aux->id,0);
-			aux->te = 0; //retira tudo pq é menor que o quantum
-		}
-		else{
-			aux->te = (aux->te-QUANTUM);
-			printf("Retirado %d do processo %d | TE T = %d\n", QUANTUM, aux->id, aux->te);	
-		}
+			//retira 2 do tempo execução do processo atual
+			if(aux->te<QUANTUM){
+				printf("Retirado %d do processo %d | TE T = %d\n", aux->te, aux->id,0);
+				aux->te = 0; //retira tudo pq é menor que o quantum
+			}
+			else{
+				aux->te = (aux->te-QUANTUM);
+				printf("Retirado %d do processo %d | TE T = %d\n", QUANTUM, aux->id, aux->te);	
+			}
 		
-		//passa para o próximo processo
-		retira_finalizado(m); //a que fica sem os processos é a k
-		aux = atualizada;
-		sleep(3);
+			//passa para o próximo processo
+		}
+		m = retira_finalizado(m);
+		aux = m->ini;
+		sleep(1);
 	}
 }
 
